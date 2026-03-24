@@ -21,10 +21,15 @@ export default function LoginPage() {
       await login(form.email, form.password);
       navigate("/dashboard");
     } catch (error) {
-      alert("Authentication failed. Please check your credentials.");
+      const detail = error?.response?.data?.detail;
+      const msg = detail
+        ? (Array.isArray(detail) ? detail.map((d) => d.msg).join(", ") : detail)
+        : "Authentication failed. Please check your credentials.";
+      alert(msg);
       setLoading(false);
     }
   }
+
 
   const toggleMode = () => {
     setMode(mode === "login" ? "register" : "login");
