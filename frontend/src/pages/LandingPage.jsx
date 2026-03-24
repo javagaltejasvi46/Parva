@@ -7,17 +7,17 @@ export default function LandingPage() {
   const features = [
     {
       title: "Tokenized Engagement",
-      description: "Earn custom campus tokens for attending events and contributing to the community.",
+      description: "Earn custom Reva tokens for attending events and contributing to the community.",
       icon: <Zap className="text-neon-cyan" size={32} />,
     },
     {
       title: "Secure & Transparent",
-      description: "Blockchain-backed verification ensures your tokens and attendance are tamper-proof.",
+      description: "Blockchain-backed verification ensures your Reva tokens and attendance are tamper-proof.",
       icon: <ShieldCheck className="text-neon-blue" size={32} />,
     },
     {
       title: "Exclusive Rewards",
-      description: "Redeem your tokens for exclusive access, merch, or SHM cashouts directly in-app.",
+      description: "Redeem your Reva tokens for exclusive access, merch, or SHM cashouts directly in-app.",
       icon: <Trophy className="text-neon-purple" size={32} />,
     },
   ];
@@ -55,7 +55,7 @@ export default function LandingPage() {
             Build. <span className="text-gradient">Engage.</span> Earn.
           </h2>
           <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
-            The next-generation tokenized ecosystem. Participate in events, earn rewards, and own your engagement.
+            The next-generation tokenized ecosystem. Participate in events, earn Reva tokens, and own your engagement.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center">

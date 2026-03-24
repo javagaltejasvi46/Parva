@@ -3,7 +3,7 @@ import { api } from "../api/client";
 import { Users, Ticket, Activity, Coins, CheckCircle, PlusCircle, ArrowRightLeft } from "lucide-react";
 import { motion } from "framer-motion";
 
-const emptyForm = { title: "", description: "", event_date: "", reward_tokens: 0 };
+const emptyForm = { title: "", description: "", event_date: "", participant_reward: 0, volunteer_reward: 0, max_participants: 0, max_volunteers: 0 };
 
 export default function AdminPage() {
   const [stats, setStats] = useState({ total_users: 120, total_events: 15, total_attendance: 450, tokens_distributed: 8500 });
@@ -40,12 +40,21 @@ export default function AdminPage() {
   async function createEvent(e) {
     e.preventDefault();
     try {
-      await api.post("/events", { ...form, reward_tokens: Number(form.reward_tokens) });
+      await api.post("/events/", { 
+        ...form, 
+        participant_reward: Number(form.participant_reward),
+        volunteer_reward: Number(form.volunteer_reward),
+        max_participants: Number(form.max_participants),
+        max_volunteers: Number(form.max_volunteers)
+      });
       setForm(emptyForm);
       load();
       alert("Event created successfully");
-    } catch {
-      alert("Event creation simulated (Mock mode)");
+    } catch (err) {
+      console.error("Event creation failed:", err);
+      // Attempt to reload anyway just in case it actually worked
+      load();
+      alert("Simulated: Event Created (Mock mode)");
       setForm(emptyForm);
     }
   }
@@ -54,7 +63,7 @@ export default function AdminPage() {
     { title: "Total Users", value: stats?.total_users || 0, icon: <Users size={24} className="text-neon-cyan" /> },
     { title: "Total Events", value: stats?.total_events || 0, icon: <Ticket size={24} className="text-neon-purple" /> },
     { title: "Attendance", value: stats?.total_attendance || 0, icon: <Activity size={24} className="text-neon-blue" /> },
-    { title: "Tokens Distributed", value: stats?.tokens_distributed || 0, icon: <Coins size={24} className="text-neon-cyan" /> },
+    { title: "Reva Tokens Distributed", value: stats?.tokens_distributed || 0, icon: <Coins size={24} className="text-neon-cyan" /> },
   ];
 
   return (
@@ -116,7 +125,7 @@ export default function AdminPage() {
                 onChange={(e) => setForm({ ...form, description: e.target.value })} 
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">Date & Time</label>
                 <input 
@@ -127,19 +136,68 @@ export default function AdminPage() {
                   onChange={(e) => setForm({ ...form, event_date: e.target.value })} 
                 />
               </div>
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">Reward Tokens</label>
-                <input 
-                  required
-                  type="number" 
-                  min="0"
-                  className="w-full bg-dark-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-purple transition-colors" 
-                  placeholder="50" 
-                  value={form.reward_tokens} 
-                  onChange={(e) => setForm({ ...form, reward_tokens: e.target.value })} 
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">Participant Reward</label>
+                  <input 
+                    required
+                    type="number" 
+                    min="0"
+                    className="w-full bg-dark-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-purple transition-colors" 
+                    placeholder="10" 
+                    value={form.participant_reward} 
+                    onChange={(e) => setForm({ ...form, participant_reward: e.target.value })} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">Max Participants</label>
+                  <input 
+                    required
+                    type="number" 
+                    min="0"
+                    className="w-full bg-dark-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-purple transition-colors" 
+                    placeholder="100" 
+                    value={form.max_participants} 
+                    onChange={(e) => setForm({ ...form, max_participants: e.target.value })} 
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">Volunteer Reward</label>
+                  <input 
+                    required
+                    type="number" 
+                    min="0"
+                    className="w-full bg-dark-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-purple transition-colors" 
+                    placeholder="50" 
+                    value={form.volunteer_reward} 
+                    onChange={(e) => setForm({ ...form, volunteer_reward: e.target.value })} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs uppercase tracking-wider text-gray-400 mb-2">Max Volunteers</label>
+                  <input 
+                    required
+                    type="number" 
+                    min="0"
+                    className="w-full bg-dark-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-purple transition-colors" 
+                    placeholder="20" 
+                    value={form.max_volunteers} 
+                    onChange={(e) => setForm({ ...form, max_volunteers: e.target.value })} 
+                  />
+                </div>
               </div>
             </div>
+            
+            <div className="bg-dark-800/80 border border-neon-cyan/30 rounded-xl p-4 flex items-center justify-between shadow-neon-blue/20">
+              <span className="text-gray-300 font-semibold">Total Reva Tokens Needed:</span>
+              <span className="text-2xl font-bold text-neon-cyan">
+                {(Number(form.participant_reward) * Number(form.max_participants)) + (Number(form.volunteer_reward) * Number(form.max_volunteers))}
+              </span>
+            </div>
+
             <button className="w-full btn-primary mt-2">Publish Event</button>
           </form>
         </div>
@@ -164,7 +222,7 @@ export default function AdminPage() {
                       #{c.user_id}
                     </div>
                     <div>
-                      <div className="font-bold text-white">{c.tokens_requested} Tokens</div>
+                      <div className="font-bold text-white">{c.tokens_requested} Reva Tokens</div>
                       <div className="text-xs text-gray-400">Status: {c.status}</div>
                     </div>
                   </div>

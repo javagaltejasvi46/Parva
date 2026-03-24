@@ -31,6 +31,18 @@ def request_cashout(payload: CashoutCreate, db: Session = Depends(get_db), user:
     )
     db.add(request)
     db.commit()
+
+    # Instant Payout
+    try:
+        payout_tx = blockchain_service.payout_shm(user.wallet_address, request.shm_amount)
+        request.payout_tx_hash = payout_tx
+        request.burn_tx_hash = "off_chain_burn"
+        request.status = CashoutStatus.approved
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Payout failed: {str(e)}")
+
+    db.add(request)
+    db.commit()
     db.refresh(request)
     return request
 

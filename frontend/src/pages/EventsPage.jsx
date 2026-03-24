@@ -10,14 +10,19 @@ export default function EventsPage() {
 
   async function load() {
     try {
-      const { data } = await api.get("/events");
-      setEvents(data);
-    } catch {
-      // Mock data if backend is unreachable
+      const res = await api.get("/events/");
+      if (res.data && res.data.length > 0) {
+        setEvents(res.data);
+      } else {
+        throw new Error("Empty events list, falling back to mock");
+      }
+    } catch (err) {
+      console.error("Failed to load events:", err);
+      // Mock data if backend is unreachable or empty
       setEvents([
-        { id: 1, title: "Web3 Campus Hackathon", description: "Build the future of decentralized apps. Join teams and win campus tokens.", event_date: "2026-10-24T10:00:00Z", reward_tokens: 50 },
-        { id: 2, title: "Blockchain 101 Seminar", description: "Learn the basics of smart contracts, wallets, and ecosystem economics.", event_date: "2026-10-26T14:00:00Z", reward_tokens: 15 },
-        { id: 3, title: "Community Meetup", description: "Network with other token holders and project builders on campus.", event_date: "2026-10-28T18:00:00Z", reward_tokens: 10 },
+        { id: 1, title: "Web3 Campus Hackathon", description: "Build the future of decentralized apps. Join teams and win campus tokens.", event_date: "2026-10-24T10:00:00Z", participant_reward: 50, volunteer_reward: 100 },
+        { id: 2, title: "Blockchain 101 Seminar", description: "Learn the basics of smart contracts, wallets, and ecosystem economics.", event_date: "2026-10-26T14:00:00Z", participant_reward: 15, volunteer_reward: 30 },
+        { id: 3, title: "Community Meetup", description: "Network with other token holders and project builders on campus.", event_date: "2026-10-28T18:00:00Z", participant_reward: 10, volunteer_reward: 20 },
       ]);
     }
   }
@@ -26,10 +31,10 @@ export default function EventsPage() {
     load();
   }, []);
 
-  async function rsvp(eventId) {
+  async function rsvp(eventId, role) {
     try {
-      await api.post(`/events/${eventId}/rsvp`);
-      alert("RSVP successful!");
+      await api.post(`/events/${eventId}/rsvp?role=${role}`);
+      alert(`RSVP successful as ${role}!`);
     } catch {
       alert("RSVP simulated (Mock mode)");
     }
@@ -45,7 +50,7 @@ export default function EventsPage() {
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold mb-2 text-white">Discover Events</h1>
-          <p className="text-gray-400">Attend events to earn tokens and rank up.</p>
+          <p className="text-gray-400">Attend events to earn Reva tokens and rank up.</p>
         </div>
         <div className="flex gap-2 relative">
           <input 
@@ -73,9 +78,9 @@ export default function EventsPage() {
               {/* Event Image Placeholder / Header Area */}
               <div className="h-40 bg-gradient-to-br from-dark-800 to-dark-700 relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800&auto=format&fit=crop')] opacity-20 bg-cover bg-center mix-blend-overlay" />
-                <div className="absolute top-4 right-4 bg-neon-purple/20 text-neon-purple border border-neon-purple/30 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-1 shadow-neon-purple">
+                <div className="absolute top-4 right-4 bg-neon-purple/20 text-neon-purple border border-neon-purple/30 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold tracking-widest flex items-center gap-1 shadow-neon-purple">
                   <Ticket size={14} />
-                  +{ev.reward_tokens} Tokens
+                  P:{ev.participant_reward} | V:{ev.volunteer_reward} Reva
                 </div>
               </div>
 
@@ -95,13 +100,21 @@ export default function EventsPage() {
                   </div>
                 </div>
 
-                <div className="flex gap-3 mt-auto">
-                  <button 
-                    onClick={() => rsvp(ev.id)}
-                    className="flex-1 btn-primary py-2 text-sm"
-                  >
-                    RSVP
-                  </button>
+                <div className="flex gap-2 mt-auto">
+                  <div className="flex flex-col gap-2 flex-1">
+                    <button 
+                      onClick={() => rsvp(ev.id, 'participant')}
+                      className="btn-primary py-1.5 text-xs h-full"
+                    >
+                      RSVP as Participant
+                    </button>
+                    <button 
+                      onClick={() => rsvp(ev.id, 'volunteer')}
+                      className="btn-outline py-1.5 text-xs h-full"
+                    >
+                      RSVP as Volunteer
+                    </button>
+                  </div>
                   <button 
                     onClick={() => handleCheckIn(ev)}
                     className="flex-1 btn-outline py-2 text-sm flex items-center justify-center gap-2"
@@ -143,7 +156,7 @@ export default function EventsPage() {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">Scan to Check-in</h3>
                 <p className="text-sm text-gray-400 mb-8">
-                  Present this QR code at the event entrance to claim your {selectedEvent.reward_tokens} tokens for <strong>{selectedEvent.title}</strong>.
+                  Present this QR code at the event entrance to claim your respective Reva tokens for <strong>{selectedEvent.title}</strong>.
                 </p>
 
                 {/* Simulated QR Code Visual */}

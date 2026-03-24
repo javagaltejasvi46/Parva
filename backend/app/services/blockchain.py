@@ -2,7 +2,7 @@ import os
 import hashlib
 from datetime import datetime
 from web3 import Web3
-from web3.middleware import geth_poa_middleware
+from web3.middleware import ExtraDataToPOAMiddleware
 
 class BlockchainService:
     """
@@ -14,14 +14,20 @@ class BlockchainService:
         # Connect to Shardeum Sphinx network
         rpc_url = os.getenv("SHARDEUM_RPC_URL", "https://sphinx.shardeum.org/")
         self.w3 = Web3(Web3.HTTPProvider(rpc_url))
-        self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        self.w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
         
-        self.private_key = os.getenv("TREASURY_PRIVATE_KEY", None)
+        self.private_key = os.getenv("PLATFORM_PRIVATE_KEY", None)
         self.treasury_address = None
         
-        if self.private_key:
-            account = self.w3.eth.account.from_key(self.private_key)
-            self.treasury_address = account.address
+        if self.private_key and len(self.private_key) >= 64:
+            try:
+                account = self.w3.eth.account.from_key(self.private_key)
+                self.treasury_address = account.address
+            except Exception as e:
+                print(f"Failed to load treasury key: {e}")
+                self.private_key = None
+        else:
+            self.private_key = None
 
     def mint_tokens(self, user_wallet: str, amount: int) -> str:
         # Off-chain architecture: tokens are just DB records

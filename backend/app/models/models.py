@@ -42,7 +42,10 @@ class Event(Base):
     title: Mapped[str] = mapped_column(String(200), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     event_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
-    reward_tokens: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    participant_reward: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    volunteer_reward: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    max_participants: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    max_volunteers: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     geo_latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     geo_longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     created_by: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
@@ -57,6 +60,7 @@ class RSVP(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     event_id: Mapped[int] = mapped_column(ForeignKey("events.id"), nullable=False)
+    role: Mapped[str] = mapped_column(String(50), default="participant", nullable=False)  # volunteer or participant
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
 
 

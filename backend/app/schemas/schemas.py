@@ -42,7 +42,10 @@ class EventBase(BaseModel):
     title: str
     description: str
     event_date: datetime
-    reward_tokens: int = Field(ge=0)
+    participant_reward: int = Field(ge=0)
+    volunteer_reward: int = Field(ge=0)
+    max_participants: int = Field(ge=0, default=0)
+    max_volunteers: int = Field(ge=0, default=0)
     geo_latitude: Optional[float] = None
     geo_longitude: Optional[float] = None
 
@@ -55,7 +58,10 @@ class EventUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     event_date: Optional[datetime] = None
-    reward_tokens: Optional[int] = Field(default=None, ge=0)
+    participant_reward: Optional[int] = Field(default=None, ge=0)
+    volunteer_reward: Optional[int] = Field(default=None, ge=0)
+    max_participants: Optional[int] = Field(default=None, ge=0)
+    max_volunteers: Optional[int] = Field(default=None, ge=0)
     geo_latitude: Optional[float] = None
     geo_longitude: Optional[float] = None
 

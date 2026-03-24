@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.core.limiter import limiter
 from app.db.database import get_db
-from app.models.models import Attendance, Event, RewardLog, User
+from app.models.models import Attendance, Event, RewardLog, RSVP, User
 from app.schemas.schemas import AttendanceScan
 from app.services.blockchain import blockchain_service
 
@@ -46,12 +46,17 @@ def scan(request: Request, payload: AttendanceScan, db: Session = Depends(get_db
     attendance = Attendance(user_id=user.id, event_id=event.id)
     db.add(attendance)
 
+    # Check RSVP role to determine reward amout
+    rsvp_record = db.query(RSVP).filter(RSVP.user_id == user.id, RSVP.event_id == event.id).first()
+    role = rsvp_record.role if rsvp_record else "participant"
+    tokens_to_award = event.volunteer_reward if role == "volunteer" else event.participant_reward
+
     tx_hash = None
-    if event.reward_tokens > 0:
+    if tokens_to_award > 0:
         if not user.wallet_address:
             raise HTTPException(status_code=400, detail="Wallet not synced")
-        tx_hash = blockchain_service.mint_tokens(user.wallet_address, event.reward_tokens)
-        db.add(RewardLog(user_id=user.id, event_id=event.id, tokens_awarded=event.reward_tokens, tx_hash=tx_hash))
+        tx_hash = blockchain_service.mint_tokens(user.wallet_address, tokens_to_award)
+        db.add(RewardLog(user_id=user.id, event_id=event.id, tokens_awarded=tokens_to_award, tx_hash=tx_hash))
 
     db.commit()
-    return {"message": "Attendance marked", "reward_tx_hash": tx_hash}
+    return {"message": "Attendance marked", "reward_tx_hash": tx_hash, "tokens_awarded": tokens_to_award, "role": role}

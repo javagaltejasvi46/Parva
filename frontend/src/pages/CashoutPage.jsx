@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { api } from "../api/client";
 import { ArrowRightLeft, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -6,21 +7,26 @@ export default function CashoutPage() {
   const [amount, setAmount] = useState("");
   const [status, setStatus] = useState("idle");
 
-  const conversionRate = 0.05; // 1 Token = 0.05 SHM
+  const conversionRate = 0.05; // 1 Reva Token = 0.05 SHM
   const estimatedSHM = amount ? (parseFloat(amount) * conversionRate).toFixed(3) : "0.000";
 
-  const handleCashout = () => {
+  const handleCashout = async () => {
     setStatus("processing");
-    setTimeout(() => {
+    try {
+      await api.post("/cashout/request", { tokens_requested: Number(amount) });
       setStatus("success");
-    }, 2000);
+      setAmount("");
+    } catch (error) {
+      alert("Cashout failed: " + (error?.response?.data?.detail || error.message));
+      setStatus("idle");
+    }
   };
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-500">
       <header className="mb-8 text-center">
-        <h1 className="text-4xl font-bold font-sans mb-2">Cashout Tokens</h1>
-        <p className="text-gray-400">Convert your earned tokens into SHM</p>
+        <h1 className="text-4xl font-bold font-sans mb-2">Cashout Reva</h1>
+        <p className="text-gray-400">Convert your earned Reva tokens into SHM</p>
       </header>
 
       <div className="glass-panel p-8 md:p-10 relative overflow-hidden text-center">
@@ -34,7 +40,7 @@ export default function CashoutPage() {
               <CheckCircle2 size={48} className="text-neon-cyan" />
             </div>
             <h2 className="text-3xl font-bold mb-2">Success!</h2>
-            <p className="text-gray-400 text-lg">Your tokens have been successfully converted to SHM.</p>
+            <p className="text-gray-400 text-lg">Your Reva tokens have been successfully converted to SHM.</p>
             <button onClick={() => setStatus("idle")} className="btn-outline mt-8 px-8 py-3">
               Cashout Again
             </button>
@@ -54,7 +60,7 @@ export default function CashoutPage() {
                   className="w-full bg-dark-800 border-2 border-white/10 rounded-xl px-6 py-5 text-4xl font-bold text-white placeholder-gray-600 focus:outline-none focus:border-neon-purple focus:shadow-[0_0_15px_rgba(176,38,255,0.3)] transition-all"
                 />
                 <div className="absolute right-6 top-1/2 -translate-y-1/2 text-neon-cyan font-bold text-xl">
-                  TOKENS
+                  REVA
                 </div>
               </div>
             </div>
