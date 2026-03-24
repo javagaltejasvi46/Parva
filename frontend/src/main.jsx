@@ -8,6 +8,9 @@ import AdminPage from "./pages/AdminPage";
 import DashboardPage from "./pages/DashboardPage";
 import EventsPage from "./pages/EventsPage";
 import LoginPage from "./pages/LoginPage";
+import LandingPage from "./pages/LandingPage";
+import WalletPage from "./pages/WalletPage";
+import CashoutPage from "./pages/CashoutPage";
 
 function PrivateRoute({ children }) {
   const { user, loading } = React.useContext(AuthContext);
@@ -21,6 +24,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route
             path="/"
@@ -30,10 +34,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               </PrivateRoute>
             }
           >
-            <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="events" element={<EventsPage />} />
             <Route path="admin" element={<AdminPage />} />
+            <Route path="wallet" element={<WalletPage />} />
+            <Route path="cashout" element={<CashoutPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
